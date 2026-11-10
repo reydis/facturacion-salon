@@ -155,7 +155,7 @@ textarea.i{min-height:64px;resize:vertical}
   <header class="top">
     <div>
       <h1 id="hdrName">Mi Salón</h1>
-      <div class="sub" id="hdrSub">Facturación de extensiones</div>
+      <div class="sub" id="hdrSub">Facturación · Billing</div>
     </div>
     <div class="row" style="gap:8px"><button class="iconbtn" data-act="go" data-v="ajustes" aria-label="Datos del negocio" id="gearBtn"></button><button class="btn p sm" data-act="go" data-v="nueva">+ Factura</button></div>
   </header>
@@ -2465,30 +2465,37 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num = v => { const n = parseFloat(String(v).replace(/,/g,'')); return isFinite(n) ? n : 0; };
 const r2 = n => Math.round(n * 100) / 100;
-const money = n => 'RD$ ' + (Number(n) || 0).toLocaleString('es-DO', {minimumFractionDigits:2, maximumFractionDigits:2});
+const money = n => { const v = Number(n) || 0; return (v < 0 ? '−' : '') + '$' + Math.abs(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const hoy = () => { const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
 const fFecha = s => { if (!s) return ''; const [y,m,d] = s.split('-'); return d+'/'+m+'/'+y; };
 const mesActual = () => hoy().slice(0,7);
-const METODOS = ['Efectivo','Transferencia','QR / app del banco','Tarjeta','PayPal','Cripto','Otro'];
+const METODOS = ['Efectivo / Cash','Zelle','Cash App','Venmo','Tarjeta / Card','PayPal','Transferencia','Cripto','Otro'];
 const CATEGORIAS = ['Pelo / bundles','Extensiones','Pelucas / lace','Pegamentos y keratina','Herramientas','Cuidado del pelo','Otro'];
 const UNIDADES = ['paquete','unidad','mechón','onza','gramo','frasco','caja'];
 
-const DEF_NEG = { nombre:'Mi Salón', telefono:'', direccion:'', rnc:'', prefijo:'F-', siguiente:1, itbis:false, tasa:18, pagos:{}, pie:'¡Gracias por tu preferencia! 💇‍♀️\nCuida tus extensiones: no dormir con el pelo mojado.' };
+const DEF_NEG = { nombre:'Impulse Hair Creations', telefono:'(201) 702-2736', direccion:'164 Sterling Ave, Jersey City, NJ 07305', rnc:'', prefijo:'IHC-', siguiente:1, itbis:true, tasa:6.625, pagos:{},
+  pie:'Política de citas / Appointment Policy\nTodos los servicios son por cita. Se requiere un depósito del 30 % para reservar, el cual se descuenta del total el día del servicio. Si no se presenta a su cita, pierde el depósito.\nAll services are by appointment only. A 30% deposit is required to book and will be applied to your total on the day of service. Missed appointments forfeit the deposit.\n\n¡Gracias por tu preferencia! · Thank you for choosing us! 💇‍♀️' };
+function migrarNeg(n){
+  n = {...DEF_NEG, ...(n||{})};
+  if (!n.nombre || n.nombre === 'Mi Salón') n = {...n, nombre: DEF_NEG.nombre, telefono: n.telefono || DEF_NEG.telefono, direccion: n.direccion || DEF_NEG.direccion, pie: DEF_NEG.pie, tasa: DEF_NEG.tasa, itbis: DEF_NEG.itbis, prefijo: (n.prefijo === 'F-' ? DEF_NEG.prefijo : n.prefijo)};
+  if (num(n.tasa) === 18) n.tasa = DEF_NEG.tasa;
+  return n;
+}
 
 const SUGERIDOS = [
-  'Instalación extensiones cosidas (trenzado)',
-  'Instalación extensiones de keratina',
-  'Instalación extensiones de cinta (tape-in)',
-  'Instalación microlinks / anillos',
-  'Colocación clip-in',
-  'Mantenimiento / subida de extensiones',
-  'Retiro de extensiones',
-  'Pelo (paquete / bundle)',
-  'Instalación de peluca / lace',
-  'Lavado y secado',
-  'Planchado / peinado',
-  'Tinte o matizado de extensiones'
+  'Consulta / Consultation',
+  'Extensiones keratina / K-tip install',
+  'Extensiones de cinta / Tape-in install',
+  'Extensiones cosidas / Sew-in install',
+  'Microlinks / I-tip install',
+  'Mantenimiento / Maintenance (move-up)',
+  'Retiro de extensiones / Removal',
+  'Instalación de peluca / Wig install',
+  'Confección de peluca / Wig making',
+  'Color de extensiones / Extension coloring',
+  'Lavado y secado / Wash & blow-dry',
+  'Peinado / Styling'
 ];
 
 /* ============ estado ============ */
@@ -2500,7 +2507,7 @@ const S = {
 };
 function nuevoDraft(){
   return { fecha: hoy(), clienteId: '', nNombre: '', nTel: '', items: [], descuento: 0,
-    itbis: !!S.negocio.itbis, abono: 0, metodo: 'Efectivo', nota: '', proxima: '' };
+    itbis: !!S.negocio.itbis, abono: 0, metodo: 'Efectivo / Cash', nota: '', proxima: '' };
 }
 
 /* ============ cálculos ============ */
@@ -2508,8 +2515,10 @@ function calc(f){
   const subtotal = r2((f.items||[]).reduce((a,it) => a + num(it.cant) * num(it.precio), 0));
   const desc = Math.min(num(f.descuento), subtotal);
   const base = r2(subtotal - desc);
-  const tasa = num(f.tasa ?? S.negocio.tasa ?? 18);
-  const itbis = f.itbis ? r2(base * tasa / 100) : 0;
+  const tasa = num(f.tasa ?? S.negocio.tasa ?? 6.625);
+  const prodSub = (f.items||[]).filter(it => it.invId).reduce((a,it) => a + num(it.cant) * num(it.precio), 0);
+  const gravable = subtotal > 0 ? prodSub * (base / subtotal) : 0;
+  const itbis = f.itbis ? r2(gravable * tasa / 100) : 0;
   const total = r2(base + itbis);
   const pagado = r2((f.pagos||[]).reduce((a,p) => a + num(p.monto), 0));
   const balance = r2(Math.max(0, total - pagado));
@@ -2520,7 +2529,7 @@ function calc(f){
   else if (pagado > 0) estado = 'Abonada';
   return { subtotal, desc, base, tasa, itbis, total, pagado, balance, estado };
 }
-const numFmt = f => (f.prefijo ?? S.negocio.prefijo ?? 'F-') + String(f.numero).padStart(4,'0');
+const numFmt = f => (f.prefijo ?? S.negocio.prefijo ?? 'IHC-') + String(f.numero).padStart(4,'0');
 const cliente = id => S.clientes.find(c => c.id === id);
 
 /* ============ almacenamiento ============ */
@@ -2528,7 +2537,7 @@ let db = null;
 const LKEY = 'facturacion_pelo_v1';
 function localLoad(){
   try { const raw = localStorage.getItem(LKEY); if (raw) { const d = JSON.parse(raw);
-    S.negocio = {...DEF_NEG, ...(d.negocio||{})}; S.clientes = d.clientes||[]; S.servicios = d.servicios||[]; S.facturas = d.facturas||[]; S.inventario = d.inventario||[]; } } catch(e){}
+    S.negocio = migrarNeg(d.negocio); S.clientes = d.clientes||[]; S.servicios = d.servicios||[]; S.facturas = d.facturas||[]; S.inventario = d.inventario||[]; } } catch(e){}
 }
 function localPersist(){
   try { localStorage.setItem(LKEY, JSON.stringify({negocio:S.negocio, clientes:S.clientes, servicios:S.servicios, facturas:S.facturas, inventario:S.inventario})); } catch(e){}
@@ -2577,7 +2586,7 @@ async function init(){
   const done = () => { if (Object.values(S.loaded).every(Boolean)) { clearTimeout(slowT); S.mode = 'nube'; S.slow = false; } render(); };
   const onErr = e => { clearTimeout(slowT); if (e && e.code === 'revoked') S.readOnly = true; S.slow = true; render(); };
   db.doc('config/negocio').onSnapshot(s => {
-    S.negocio = {...DEF_NEG, ...(s.exists ? s.data() : {})};
+    S.negocio = migrarNeg(s.exists ? s.data() : {});
     S.loaded.neg = true; done();
   }, onErr);
   db.collection('clientes').onSnapshot(s => { S.clientes = docsOf(s); S.loaded.cli = true; done(); }, onErr);
@@ -2666,15 +2675,15 @@ function vNueva(){
   return '<div class="sec-t"><h2>Nueva factura</h2><span class="small muted">'+numFmt({numero: proximoNumero()})+'</span></div>'+
   '<div class="card"><div class="row"><div class="grow"><label class="f" style="margin-top:0">Clienta</label><select class="i" data-f="clienteId">'+cliOpts+'</select></div>'+
   '<div style="width:150px"><label class="f" style="margin-top:0">Fecha</label><input class="i" type="date" data-f="fecha" value="'+esc(d.fecha)+'"></div></div>'+
-  (d.clienteId==='__nuevo' ? '<div class="row"><div class="grow"><label class="f">Nombre</label><input class="i" data-f="nNombre" value="'+esc(d.nNombre)+'" placeholder="Nombre de la clienta"></div><div class="grow"><label class="f">Teléfono / WhatsApp</label><input class="i" type="tel" data-f="nTel" value="'+esc(d.nTel)+'" placeholder="809-000-0000"></div></div>' : '')+
+  (d.clienteId==='__nuevo' ? '<div class="row"><div class="grow"><label class="f">Nombre</label><input class="i" data-f="nNombre" value="'+esc(d.nNombre)+'" placeholder="Nombre de la clienta"></div><div class="grow"><label class="f">Teléfono / WhatsApp</label><input class="i" type="tel" data-f="nTel" value="'+esc(d.nTel)+'" placeholder="(201) 000-0000"></div></div>' : '')+
   '</div>'+
   '<div class="card"><div class="sec-t" style="margin-top:0"><h3 style="font-size:16px">Servicios y productos</h3></div><div id="items">'+itemsHtml()+'</div>'+
   '<select class="i" data-f="addser">'+serOpts+'</select>'+
   (S.servicios.length ? '' : '<div class="small muted" style="margin-top:6px">Tip: guarda tus servicios con precio en la pestaña <b>Servicios</b> para facturar más rápido.</div>')+
   '</div>'+
-  '<div class="card"><div class="row"><div class="grow"><label class="f" style="margin-top:0">Descuento (RD$)</label><input class="i" inputmode="decimal" data-f="descuento" value="'+(d.descuento||'')+'" placeholder="0"></div>'+
-  '<div class="grow" style="padding-top:18px"><label class="switch"><input type="checkbox" data-f="itbis"'+(d.itbis?' checked':'')+'> Cobrar ITBIS ('+num(S.negocio.tasa)+'%)</label></div></div>'+
-  '<div class="row"><div class="grow"><label class="f">Pago / abono ahora (RD$)</label><input class="i" inputmode="decimal" data-f="abono" value="'+(d.abono||'')+'" placeholder="0"></div>'+
+  '<div class="card"><div class="row"><div class="grow"><label class="f" style="margin-top:0">Descuento ($)</label><input class="i" inputmode="decimal" data-f="descuento" value="'+(d.descuento||'')+'" placeholder="0"></div>'+
+  '<div class="grow" style="padding-top:18px"><label class="switch"><input type="checkbox" data-f="itbis"'+(d.itbis?' checked':'')+'> Sales tax ('+num(S.negocio.tasa)+'%) solo a productos</label></div></div>'+
+  '<div class="row"><div class="grow"><label class="f">Pago / abono ahora ($)</label><input class="i" inputmode="decimal" data-f="abono" value="'+(d.abono||'')+'" placeholder="0"></div>'+
   '<div class="grow"><label class="f">Método</label><select class="i" data-f="metodo">'+METODOS.map(m=>'<option'+(d.metodo===m?' selected':'')+'>'+m+'</option>').join('')+'</select></div></div>'+
   '<div class="row" style="margin-top:8px"><button class="btn sm g" data-act="pagototal">Pagó completo</button><button class="btn sm g" data-act="pagomitad">Abonó 50%</button></div>'+
   '<label class="f">Nota (opcional)</label><textarea class="i" data-f="nota" placeholder="Ej: 20 pulgadas, color 1B, 3 paquetes. Próximo mantenimiento en 6 semanas.">'+esc(d.nota)+'</textarea>'+
@@ -2687,14 +2696,14 @@ function itemsHtml(){
   if (!d.items.length) return '<div class="small muted" style="margin-bottom:10px">Agrega al menos un servicio.</div>';
   return d.items.map((it,i) => '<div class="line-item">'+(it.invId?'<div class="small muted" style="margin-bottom:4px">📦 Del almacén · se descuenta al guardar</div>':'')+'<div class="row"><input class="i grow" data-f="item" data-i="'+i+'" data-k="desc" value="'+esc(it.desc)+'" placeholder="Descripción"><button class="x" data-act="quitar" data-i="'+i+'" aria-label="Quitar">×</button></div>'+
     '<div class="g"><div><label class="f" style="margin-top:0">Cant.</label><input class="i" inputmode="decimal" data-f="item" data-i="'+i+'" data-k="cant" value="'+esc(it.cant)+'"></div>'+
-    '<div><label class="f" style="margin-top:0">Precio (RD$)</label><input class="i" inputmode="decimal" data-f="item" data-i="'+i+'" data-k="precio" value="'+esc(it.precio)+'"></div>'+
+    '<div><label class="f" style="margin-top:0">Precio ($)</label><input class="i" inputmode="decimal" data-f="item" data-i="'+i+'" data-k="precio" value="'+esc(it.precio)+'"></div>'+
     '<div class="num" style="padding-bottom:10px;font-weight:600" id="lt'+i+'">'+money(num(it.cant)*num(it.precio))+'</div></div></div>').join('');
 }
 function totHtml(){
   const d = S.draft; const c = calc({...d, pagos: num(d.abono) ? [{monto:num(d.abono)}] : []});
   return '<div class="totals"><div class="r"><span>Subtotal</span><span class="num">'+money(c.subtotal)+'</span></div>'+
     (c.desc ? '<div class="r"><span>Descuento</span><span class="num">−'+money(c.desc)+'</span></div>' : '')+
-    (d.itbis ? '<div class="r"><span>ITBIS '+c.tasa+'%</span><span class="num">'+money(c.itbis)+'</span></div>' : '')+
+    (d.itbis && c.itbis ? '<div class="r"><span>Sales tax '+c.tasa+'% (productos)</span><span class="num">'+money(c.itbis)+'</span></div>' : '')+
     '<div class="r big"><span>Total</span><span class="num">'+money(c.total)+'</span></div>'+
     (c.pagado ? '<div class="r"><span>Pagado ahora</span><span class="num">'+money(c.pagado)+'</span></div><div class="r" style="font-weight:700"><span>Queda debiendo</span><span class="num">'+money(c.balance)+'</span></div>' : '')+'</div>';
 }
@@ -2728,7 +2737,7 @@ function vVer(){
   '<div class="receipt"><div class="stamp '+c.estado+'">'+c.estado.toUpperCase()+'</div>'+
   '<div class="bh"><h2>'+esc(n.nombre)+'</h2>'+
    (n.direccion?'<div class="small muted">'+esc(n.direccion)+'</div>':'')+
-   '<div class="small muted">'+[n.telefono?'Tel. '+esc(n.telefono):'', n.rnc?'RNC '+esc(n.rnc):''].filter(Boolean).join(' · ')+'</div></div>'+
+   '<div class="small muted">'+[n.telefono?'Tel. '+esc(n.telefono):'', n.rnc?'EIN '+esc(n.rnc):''].filter(Boolean).join(' · ')+'</div></div>'+
   '<div class="meta"><div><div class="muted small">Cliente</div><b>'+esc(f.clienteNombre||'—')+'</b>'+(f.clienteTel?'<div class="small">'+esc(f.clienteTel)+'</div>':'')+'</div>'+
    '<div style="text-align:right"><div class="muted small">Factura</div><b>'+numFmt(f)+'</b><div class="small">'+fFecha(f.fecha)+'</div></div></div>'+
   '<table><thead><tr><th>Descripción</th><th class="tr">Cant.</th><th class="tr">Importe</th></tr></thead><tbody>'+
@@ -2736,7 +2745,7 @@ function vVer(){
   '</tbody></table><div class="sum">'+
    '<div class="r"><span>Subtotal</span><span class="num">'+money(c.subtotal)+'</span></div>'+
    (c.desc?'<div class="r"><span>Descuento</span><span class="num">−'+money(c.desc)+'</span></div>':'')+
-   (f.itbis?'<div class="r"><span>ITBIS '+c.tasa+'%</span><span class="num">'+money(c.itbis)+'</span></div>':'')+
+   (f.itbis && c.itbis?'<div class="r"><span>Sales tax '+c.tasa+'%</span><span class="num">'+money(c.itbis)+'</span></div>':'')+
    '<div class="r big"><span>TOTAL</span><span class="num">'+money(c.total)+'</span></div>'+
    (f.pagos||[]).map(p => '<div class="r small"><span>Pago '+fFecha(p.fecha)+' · '+esc(p.metodo)+'</span><span class="num">−'+money(p.monto)+'</span></div>').join('')+
    (!f.anulada ? '<div class="r" style="font-weight:700;margin-top:4px"><span>'+(c.balance>0?'Balance pendiente':'Balance')+'</span><span class="num" style="color:'+(c.balance>0?'var(--bad)':'var(--ok)')+'">'+money(c.balance)+'</span></div>' : '')+
@@ -2762,7 +2771,7 @@ function textoFactura(f){
   f.items.forEach(it => { t += '• '+it.desc+(num(it.cant)!==1?' x'+it.cant:'')+' — '+money(num(it.cant)*num(it.precio))+'\n'; });
   t += '\nSubtotal: '+money(c.subtotal)+'\n';
   if (c.desc) t += 'Descuento: −'+money(c.desc)+'\n';
-  if (f.itbis) t += 'ITBIS '+c.tasa+'%: '+money(c.itbis)+'\n';
+  if (f.itbis && c.itbis) t += 'Sales tax '+c.tasa+'%: '+money(c.itbis)+'\n';
   t += '*TOTAL: '+money(c.total)+'*\n';
   if (c.pagado) t += 'Pagado: '+money(c.pagado)+'\n';
   if (f.anulada) t += '*FACTURA ANULADA*\n';
@@ -3001,7 +3010,7 @@ function cliForm(id){
   const c = id ? cliente(id) : {nombre:'',telefono:'',notas:''};
   const sel = (idx, opts, v) => '<select class="i" id="'+idx+'">'+opts.map(o => '<option value="'+esc(o)+'"'+((v||'')===o?' selected':'')+'>'+(o||'—')+'</option>').join('')+'</select>';
   modal('<h3>'+(id?'Editar clienta':'Nueva clienta')+'</h3><label class="f">Nombre</label><input class="i" id="m_nom" value="'+esc(c.nombre)+'">'+
-   '<div class="row"><div class="grow"><label class="f">Teléfono / WhatsApp</label><input class="i" id="m_tel" type="tel" value="'+esc(c.telefono)+'" placeholder="809-000-0000"></div><div class="grow"><label class="f">Instagram</label><input class="i" id="m_ig" value="'+esc(c.instagram||'')+'" placeholder="@usuario"></div></div>'+
+   '<div class="row"><div class="grow"><label class="f">Teléfono / WhatsApp</label><input class="i" id="m_tel" type="tel" value="'+esc(c.telefono)+'" placeholder="(201) 000-0000"></div><div class="grow"><label class="f">Instagram</label><input class="i" id="m_ig" value="'+esc(c.instagram||'')+'" placeholder="@usuario"></div></div>'+
    '<div class="row"><div class="grow"><label class="f">Cumpleaños</label><input class="i" type="date" id="m_cum" value="'+esc(c.cumple||'')+'"></div><div class="grow"><label class="f">Próximo mantenimiento</label><input class="i" type="date" id="m_prox" value="'+esc(c.proxima||'')+'"></div></div>'+
    '<div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap"><span class="small muted">Mantenimiento en:</span>'+[4,6,8].map(n => '<button class="btn sm g" data-act="proxsem" data-v="'+n+'" data-t="m_prox">'+n+' sem.</button>').join('')+'</div>'+
    '<div class="subsec"><div class="small" style="font-weight:700;margin-top:8px">Perfil del pelo</div>'+
@@ -3020,7 +3029,7 @@ function vServicios(){
 function serForm(id){
   const s = id ? S.servicios.find(x=>x.id===id) : {nombre:'',precio:''};
   modal('<h3>'+(id?'Editar servicio':'Nuevo servicio')+'</h3><label class="f">Nombre</label><input class="i" id="m_snom" value="'+esc(s.nombre)+'" placeholder="Ej: Extensiones keratina 20&quot;">'+
-   '<label class="f">Precio (RD$)</label><input class="i" id="m_spre" inputmode="decimal" value="'+esc(s.precio||'')+'" placeholder="0.00">'+
+   '<label class="f">Precio ($)</label><input class="i" id="m_spre" inputmode="decimal" value="'+esc(s.precio||'')+'" placeholder="0.00">'+
    '<div class="row" style="margin-top:14px">'+(id?'<button class="btn d" data-act="serdel" data-id="'+id+'">Borrar</button>':'')+'<span class="grow"></span><button class="btn" data-act="cerrar">Cancelar</button><button class="btn p" data-act="serguardar" data-id="'+(id||'')+'">Guardar</button></div>');
 }
 
@@ -3029,10 +3038,10 @@ function vAjustes(){
   return '<button class="btn g block" style="margin-bottom:12px" data-act="go" data-v="servicios">✂️ Servicios y precios ('+S.servicios.length+')</button>'+
   '<div class="sec-t"><h2>Datos del negocio</h2></div><div class="card">'+
   '<label class="f" style="margin-top:0">Nombre del salón / estilista</label><input class="i" id="a_nom" value="'+esc(n.nombre)+'"'+dis+'>'+
-  '<div class="row"><div class="grow"><label class="f">Teléfono</label><input class="i" id="a_tel" value="'+esc(n.telefono)+'"'+dis+'></div><div class="grow"><label class="f">RNC / Cédula (opcional)</label><input class="i" id="a_rnc" value="'+esc(n.rnc)+'"'+dis+'></div></div>'+
+  '<div class="row"><div class="grow"><label class="f">Teléfono</label><input class="i" id="a_tel" value="'+esc(n.telefono)+'"'+dis+'></div><div class="grow"><label class="f">EIN / Tax ID (opcional)</label><input class="i" id="a_rnc" value="'+esc(n.rnc)+'"'+dis+'></div></div>'+
   '<label class="f">Dirección</label><input class="i" id="a_dir" value="'+esc(n.direccion)+'"'+dis+'>'+
   '<div class="row"><div class="grow"><label class="f">Prefijo de factura</label><input class="i" id="a_pre" value="'+esc(n.prefijo)+'"'+dis+'></div><div class="grow"><label class="f">Próximo número</label><input class="i" id="a_sig" inputmode="numeric" value="'+proximoNumero()+'"'+dis+'></div></div>'+
-  '<div class="row"><div class="grow" style="padding-top:20px"><label class="switch"><input type="checkbox" id="a_itb"'+(n.itbis?' checked':'')+dis+'> ITBIS activado por defecto</label></div><div style="width:110px"><label class="f">Tasa ITBIS %</label><input class="i" id="a_tas" inputmode="decimal" value="'+esc(n.tasa)+'"'+dis+'></div></div>'+
+  '<div class="row"><div class="grow" style="padding-top:20px"><label class="switch"><input type="checkbox" id="a_itb"'+(n.itbis?' checked':'')+dis+'> Sales tax en productos (NJ)</label></div><div style="width:110px"><label class="f">Sales tax %</label><input class="i" id="a_tas" inputmode="decimal" value="'+esc(n.tasa)+'"'+dis+'></div></div>'+
   '<label class="f">Mensaje al pie de la factura</label><textarea class="i" id="a_pie"'+dis+'>'+esc(n.pie)+'</textarea>'+
   '<div class="subsec"><h3 style="font-size:17px;margin-top:10px">Formas de pago</h3><p class="small muted" style="margin:4px 0 0">Las que actives salen en la factura y en el WhatsApp cuando la clienta debe.</p>'+pagosForm(dis)+'</div>'+
   (S.readOnly?'':'<button class="btn p block" style="margin-top:14px" data-act="ajguardar">Guardar datos</button>')+'</div>'+
@@ -3053,15 +3062,20 @@ function pagosForm(dis){
   const chk = (id, on, label) => '<label class="switch" style="margin-top:12px;font-weight:600"><input type="checkbox" id="'+id+'"'+(on?' checked':'')+dis+'> '+label+'</label>';
   const inp = (id, v, ph, lab) => '<label class="f">'+lab+'</label><input class="i" id="'+id+'" value="'+esc(v||'')+'" placeholder="'+esc(ph)+'"'+dis+'>';
   qrTmp = q.img || null;
-  return chk('pg_b', b.activo, '🏦 Transferencia bancaria')+
-    '<div class="row"><div class="grow">'+inp('pg_bb', b.banco, 'Banco Popular', 'Banco')+'</div><div class="grow">'+inp('pg_bt', b.tipo, 'Ahorros', 'Tipo de cuenta')+'</div></div>'+
-    '<div class="row"><div class="grow">'+inp('pg_bn', b.numero, '000000000', 'Número de cuenta')+'</div><div class="grow">'+inp('pg_bc', b.cedula, '000-0000000-0', 'Cédula / RNC')+'</div></div>'+
+  const z = P.zelle||{}, ca = P.cashapp||{}, ve = P.venmo||{};
+  return chk('pg_z', z.activo, '💜 Zelle')+
+    '<div class="row"><div class="grow">'+inp('pg_zd', z.dato, 'correo o teléfono', 'Correo o teléfono de Zelle')+'</div><div class="grow">'+inp('pg_zn', z.nombre, 'Nombre que sale en Zelle', 'A nombre de')+'</div></div>'+
+    chk('pg_ca', ca.activo, '💚 Cash App')+inp('pg_cat', ca.tag, '$tucashtag', 'Cashtag')+
+    chk('pg_v', ve.activo, '💙 Venmo')+inp('pg_vu', ve.usuario, '@usuario', 'Usuario de Venmo')+
+    chk('pg_b', b.activo, '🏦 Transferencia bancaria')+
+    '<div class="row"><div class="grow">'+inp('pg_bb', b.banco, 'Bank of America', 'Banco')+'</div><div class="grow">'+inp('pg_bt', b.tipo, 'Ahorros', 'Tipo de cuenta')+'</div></div>'+
+    '<div class="row"><div class="grow">'+inp('pg_bn', b.numero, '000000000', 'Número de cuenta')+'</div><div class="grow">'+inp('pg_bc', b.cedula, '', 'Routing number')+'</div></div>'+
     inp('pg_bh', b.titular, 'Nombre del titular', 'A nombre de')+
-    chk('pg_q', q.activo, '📱 Código QR de mi banco (Toke, tPago, app del banco…)')+
+    chk('pg_q', q.activo, '📱 Código QR (imagen)')+
     '<div class="row" style="margin-top:8px;align-items:center"><div id="qrPrev">'+(q.img?'<img src="'+q.img+'" style="width:90px;height:90px;border-radius:8px;border:1px solid var(--line)">':'<span class="small muted">Sin imagen</span>')+'</div>'+
     (dis?'':'<label class="btn sm g">Subir imagen del QR<input type="file" id="qrFile" accept="image/*" style="display:none"></label>')+'</div>'+
-    chk('pg_p', pp.activo, '💙 PayPal')+
-    '<div class="row"><div class="grow">'+inp('pg_pu', pp.usuario, 'tu-usuario', 'Usuario de PayPal.me')+'</div><div style="width:130px">'+inp('pg_pt', pp.tasa, '60', 'RD$ por 1 USD')+'</div></div>'+
+    chk('pg_p', pp.activo, '🅿️ PayPal')+
+    inp('pg_pu', pp.usuario, 'tu-usuario', 'Usuario de PayPal.me')+
     chk('pg_c', cr.activo, '🪙 Criptomonedas')+
     '<div class="row"><div class="grow">'+inp('pg_cm', cr.moneda, 'USDT', 'Moneda')+'</div><div class="grow">'+inp('pg_cr', cr.red, 'TRC20 / BEP20 / Binance Pay', 'Red')+'</div></div>'+
     inp('pg_cd', cr.direccion, 'Dirección de la billetera o ID de Binance Pay', 'Dirección')+
@@ -3074,7 +3088,10 @@ function leerPagosForm(){
   return {
     banco: { activo: c('pg_b'), banco: v('pg_bb'), tipo: v('pg_bt'), numero: v('pg_bn'), cedula: v('pg_bc'), titular: v('pg_bh') },
     qr: { activo: c('pg_q'), img: qrTmp || '' },
-    paypal: { activo: c('pg_p'), usuario: v('pg_pu').replace(/^.*paypal\.me\//i,'').replace(/^@/,''), tasa: num(v('pg_pt')) },
+    zelle: { activo: c('pg_z'), dato: v('pg_zd'), nombre: v('pg_zn') },
+    cashapp: { activo: c('pg_ca'), tag: v('pg_cat').replace(/^.*cash\.app\//i,'').replace(/^\$/,'') },
+    venmo: { activo: c('pg_v'), usuario: v('pg_vu').replace(/^.*venmo\.com\/(u\/)?/i,'').replace(/^@/,'') },
+    paypal: { activo: c('pg_p'), usuario: v('pg_pu').replace(/^.*paypal\.me\//i,'').replace(/^@/,'') },
     cripto: { activo: c('pg_c'), moneda: v('pg_cm'), red: v('pg_cr'), direccion: v('pg_cd') },
     otro: { activo: c('pg_o'), texto: v('pg_ot') }
   };
@@ -3082,22 +3099,30 @@ function leerPagosForm(){
 function qrSvg(text){
   try { const q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({cellSize: 4, margin: 2, scalable: true}); } catch(e){ return ''; }
 }
-function usd(monto){ const t = num((pg().paypal||{}).tasa); return t > 0 ? r2(monto / t) : 0; }
+function usd(monto){ return r2(num(monto)); }
 function paypalLink(monto){ const pp = pg().paypal||{}; const u = usd(monto); return 'https://paypal.me/'+encodeURIComponent(pp.usuario)+(u>0?'/'+u+'USD':''); }
+function cashLink(monto){ return 'https://cash.app/$'+encodeURIComponent((pg().cashapp||{}).tag||'')+'/'+usd(monto); }
+function venmoLink(){ return 'https://venmo.com/u/'+encodeURIComponent((pg().venmo||{}).usuario||''); }
 function pagoHtml(monto){
   const P = pg(); let h = '';
+  if (P.zelle && P.zelle.activo && P.zelle.dato) h += '<div class="m"><b>💜 Zelle</b> · '+money(monto)+'<br><b>'+esc(P.zelle.dato)+'</b>'+(P.zelle.nombre?'<br>'+esc(P.zelle.nombre):'')+'</div>';
+  if (P.cashapp && P.cashapp.activo && P.cashapp.tag) h += '<div class="m"><b>💚 Cash App</b> · '+money(monto)+'<br><a href="'+cashLink(monto)+'" target="_blank" rel="noopener">$'+esc(P.cashapp.tag)+'</a></div>';
+  if (P.venmo && P.venmo.activo && P.venmo.usuario) h += '<div class="m"><b>💙 Venmo</b> · '+money(monto)+'<br><a href="'+venmoLink()+'" target="_blank" rel="noopener">@'+esc(P.venmo.usuario)+'</a></div>';
   if (P.banco && P.banco.activo && P.banco.numero) h += '<div class="m"><b>🏦 Transferencia</b><br>'+esc(P.banco.banco)+(P.banco.tipo?' · '+esc(P.banco.tipo):'')+'<br>Cuenta: <b class="num">'+esc(P.banco.numero)+'</b><br>'+esc(P.banco.titular)+(P.banco.cedula?' · '+esc(P.banco.cedula):'')+'</div>';
   if (P.qr && P.qr.activo && P.qr.img) h += '<div class="m"><b>📱 Escanea con la app de tu banco</b><img src="'+P.qr.img+'" alt="QR de pago"></div>';
-  if (P.paypal && P.paypal.activo && P.paypal.usuario) { const u = usd(monto); h += '<div class="m"><b>💙 PayPal</b>'+(u?' · <b>US$ '+u.toFixed(2)+'</b>':'')+'<br><a href="'+paypalLink(monto)+'" target="_blank" rel="noopener">'+esc(paypalLink(monto).replace('https://',''))+'</a></div>'; }
+  if (P.paypal && P.paypal.activo && P.paypal.usuario) { const u = usd(monto); h += '<div class="m"><b>🅿️ PayPal</b>'+(u?' · <b>'+money(u)+'</b>':'')+'<br><a href="'+paypalLink(monto)+'" target="_blank" rel="noopener">'+esc(paypalLink(monto).replace('https://',''))+'</a></div>'; }
   if (P.cripto && P.cripto.activo && P.cripto.direccion) h += '<div class="m"><b>🪙 '+esc(P.cripto.moneda||'Cripto')+'</b>'+(P.cripto.red?' · red '+esc(P.cripto.red):'')+(usd(monto)?' · aprox. '+usd(monto).toFixed(2)+' '+esc(P.cripto.moneda||'USD'):'')+'<div class="mono" style="margin-top:4px">'+esc(P.cripto.direccion)+'</div>'+qrSvg(P.cripto.direccion)+'</div>';
   if (P.otro && P.otro.activo && P.otro.texto) h += '<div class="m"><b>➕ Otra forma</b><br>'+esc(P.otro.texto)+'</div>';
   return h ? '<div class="pay"><h4>Cómo pagar · '+money(monto)+'</h4>'+h+'</div>' : '';
 }
 function pagoTexto(monto){
   const P = pg(); let t = '';
+  if (P.zelle && P.zelle.activo && P.zelle.dato) t += '\n💜 *Zelle* ('+money(monto)+')\n'+P.zelle.dato+(P.zelle.nombre?' · '+P.zelle.nombre:'')+'\n';
+  if (P.cashapp && P.cashapp.activo && P.cashapp.tag) t += '\n💚 *Cash App* ('+money(monto)+')\n'+cashLink(monto)+'\n';
+  if (P.venmo && P.venmo.activo && P.venmo.usuario) t += '\n💙 *Venmo* ('+money(monto)+')\n'+venmoLink()+'\n';
   if (P.banco && P.banco.activo && P.banco.numero) t += '\n🏦 *Transferencia*\n'+P.banco.banco+(P.banco.tipo?' · '+P.banco.tipo:'')+'\nCuenta: '+P.banco.numero+'\n'+P.banco.titular+(P.banco.cedula?' · '+P.banco.cedula:'')+'\n';
   if (P.qr && P.qr.activo && P.qr.img) t += '\n📱 También puedes pagar con QR (pídelo o escanéalo en el salón)\n';
-  if (P.paypal && P.paypal.activo && P.paypal.usuario) t += '\n💙 *PayPal*'+(usd(monto)?' (US$ '+usd(monto).toFixed(2)+')':'')+'\n'+paypalLink(monto)+'\n';
+  if (P.paypal && P.paypal.activo && P.paypal.usuario) t += '\n🅿️ *PayPal*'+(usd(monto)?' ('+money(usd(monto))+')':'')+'\n'+paypalLink(monto)+'\n';
   if (P.cripto && P.cripto.activo && P.cripto.direccion) t += '\n🪙 *'+(P.cripto.moneda||'Cripto')+'*'+(P.cripto.red?' · red '+P.cripto.red:'')+'\n'+P.cripto.direccion+'\n';
   if (P.otro && P.otro.activo && P.otro.texto) t += '\n➕ '+P.otro.texto+'\n';
   return t ? '\n*Cómo pagar:*'+t : '';
@@ -3180,7 +3205,7 @@ function vReportes(){
   '<div class="card"><div class="sec-t" style="margin-top:0"><h3 style="font-size:16px">Ventas por '+(r.largo?'mes':'día')+'</h3><span class="small muted">máx. '+money(mx)+'</span></div>'+
    (r.facts.length ? '<div class="bars">'+ser.map((x,i) => '<div class="b" title="'+esc(x[0])+': '+money(x[1])+'"><i style="height:'+(x[1]/mx*100)+'%;'+(x[1]?'':'background:var(--line)')+'"></i><span>'+(etq(i)?esc(x[2]):'&nbsp;')+'</span></div>').join('')+'</div>' : '<div class="empty">Sin ventas en este período.</div>')+'</div>'+
   '<div class="card"><h3 style="font-size:16px;margin-bottom:6px">Resumen</h3>'+
-   [['Descuentos dados', '−'+money(r.desc)], ['ITBIS cobrado', money(r.itbis)], ['Pendiente de estas facturas', money(r.pendiente)], ['Total que te deben (todas)', money(r.totalDeben)]]
+   [['Descuentos dados', '−'+money(r.desc)], ['Sales tax cobrado', money(r.itbis)], ['Pendiente de estas facturas', money(r.pendiente)], ['Total que te deben (todas)', money(r.totalDeben)]]
    .map(([l,v]) => '<div class="row between" style="padding:5px 0;border-bottom:1px solid var(--line)"><span>'+l+'</span><b class="num">'+v+'</b></div>').join('')+
    (r.prod.n ? '<div style="margin-top:10px;padding:10px;background:var(--ok-soft);border-radius:10px"><b>Productos del almacén</b><div class="row between small" style="margin-top:4px"><span>Vendidos: '+fmtQ(r.prod.n)+' · Venta '+money(r.prod.venta)+'</span></div><div class="row between small"><span>Costo '+money(r.prod.costo)+'</span><b style="color:var(--ok)">Ganancia '+money(r.prod.ganancia)+'</b></div></div>' : '')+'</div>'+
   (mets.length ? '<div class="card"><h3 style="font-size:16px;margin-bottom:6px">Cómo te pagaron</h3>'+mets.map(([m,v]) => '<div style="padding:5px 0"><div class="row between"><span>'+esc(m)+'</span><b class="num">'+money(v)+' <span class="small muted">'+Math.round(v/r.cobrado*100)+'%</span></b></div><div class="hbar"><i style="width:'+(v/r.cobrado*100)+'%"></i></div></div>').join('')+'</div>' : '')+
@@ -3193,7 +3218,7 @@ function reporteTexto(){
   let t = '*Reporte '+n.nombre+'*\n'+fFecha(r.R[0])+(r.R[0]!==r.R[1]?' al '+fFecha(r.R[1]):'')+'\n\n';
   t += 'Cobrado: '+money(r.cobrado)+'\nFacturado: '+money(r.facturado)+' ('+r.facts.length+' facturas)\n';
   if (r.desc) t += 'Descuentos: '+money(r.desc)+'\n';
-  if (r.itbis) t += 'ITBIS: '+money(r.itbis)+'\n';
+  if (r.itbis) t += 'Sales tax: '+money(r.itbis)+'\n';
   t += 'Pendiente por cobrar: '+money(r.pendiente)+'\n';
   if (r.prod.n) t += '\nProductos vendidos: '+fmtQ(r.prod.n)+' · Ganancia '+money(r.prod.ganancia)+'\n';
   const mets = Object.entries(r.metodos); if (mets.length) { t += '\n*Formas de pago*\n'; mets.sort((a,b)=>b[1]-a[1]).forEach(([m,v]) => t += '• '+m+': '+money(v)+'\n'); }
@@ -3202,7 +3227,7 @@ function reporteTexto(){
 }
 function reporteCsv(){
   const r = reporte(); const q = v => '"'+String(v ?? '').replace(/"/g,'""')+'"';
-  const rows = [['Factura','Fecha','Clienta','Teléfono','Subtotal','Descuento','ITBIS','Total','Pagado','Balance','Estado','Formas de pago']];
+  const rows = [['Factura','Fecha','Clienta','Teléfono','Subtotal','Descuento','Sales tax','Total','Pagado','Balance','Estado','Formas de pago']];
   S.facturas.filter(f => enR(f.fecha, r.R)).sort((a,b) => (a.fecha||'').localeCompare(b.fecha||'') || a.numero - b.numero).forEach(f => { const c = calc(f);
     rows.push([numFmt(f), fFecha(f.fecha), f.clienteNombre, f.clienteTel, c.subtotal, c.desc, c.itbis, c.total, c.pagado, c.balance, c.estado, [...new Set((f.pagos||[]).map(p=>p.metodo))].join(' / ')]); });
   return '﻿' + rows.map(r => r.map(q).join(',')).join('\r\n');
@@ -3278,7 +3303,7 @@ function invForm(id){
     '<div class="row"><div class="grow"><label class="f">Categoría</label><select class="i" id="p_cat"'+dis+'>'+CATEGORIAS.map(c=>'<option'+(p.categoria===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div><div style="width:120px"><label class="f">Unidad</label><select class="i" id="p_uni"'+dis+'>'+UNIDADES.map(u=>'<option'+(p.unidad===u?' selected':'')+'>'+u+'</option>').join('')+'</select></div></div>'+
     '<div class="row"><div class="grow"><label class="f">Color / tono</label><input class="i" id="p_col" value="'+esc(p.color)+'" placeholder="1B, 613, rubio…"'+dis+'></div><div style="width:120px"><label class="f">Largo (pulg.)</label><input class="i" id="p_lar" inputmode="numeric" value="'+esc(p.largo)+'" placeholder="22"'+dis+'></div></div>'+
     '<div class="row"><div class="grow"><label class="f">'+(id?'Cantidad actual':'Cantidad que tienes')+'</label><input class="i" id="p_can" inputmode="decimal" value="'+esc(p.cantidad)+'"'+dis+'></div><div class="grow"><label class="f">Avisar cuando queden</label><input class="i" id="p_min" inputmode="decimal" value="'+esc(p.minimo)+'" placeholder="2"'+dis+'></div></div>'+
-    '<div class="row"><div class="grow"><label class="f">Costo (RD$)</label><input class="i" id="p_cos" inputmode="decimal" value="'+esc(p.costo)+'"'+dis+'></div><div class="grow"><label class="f">Precio de venta (RD$)</label><input class="i" id="p_pre" inputmode="decimal" value="'+esc(p.precio)+'"'+dis+'></div></div>'+
+    '<div class="row"><div class="grow"><label class="f">Costo ($)</label><input class="i" id="p_cos" inputmode="decimal" value="'+esc(p.costo)+'"'+dis+'></div><div class="grow"><label class="f">Precio de venta ($)</label><input class="i" id="p_pre" inputmode="decimal" value="'+esc(p.precio)+'"'+dis+'></div></div>'+
     (movs.length ? '<label class="f">Últimos movimientos</label>'+movs.map(m => '<div class="row between small" style="padding:3px 0"><span class="muted">'+fFecha(m.fecha)+' · '+esc(m.nota||'')+'</span><b class="num" style="color:'+(m.delta>0?'var(--ok)':'var(--bad)')+'">'+(m.delta>0?'+':'')+fmtQ(m.delta)+'</b></div>').join('') : '')+
     (S.readOnly?'':'<div class="row" style="margin-top:14px">'+(id?'<button class="btn d" data-act="invdel" data-id="'+id+'">Borrar</button>':'')+'<span class="grow"></span><button class="btn" data-act="cerrar">Cancelar</button><button class="btn p" data-act="invguardar" data-id="'+(id||'')+'">Guardar</button></div>'));
 }
@@ -3330,9 +3355,9 @@ async function crearFactura(){
   } else if (d.clienteId) cli = cliente(d.clienteId);
   else return toast('Elige una clienta');
   const numero = proximoNumero();
-  const f = { id: uid(), numero, prefijo: S.negocio.prefijo || 'F-', fecha: d.fecha || hoy(),
+  const f = { id: uid(), numero, prefijo: S.negocio.prefijo || 'IHC-', fecha: d.fecha || hoy(),
     clienteId: cli.id, clienteNombre: cli.nombre, clienteTel: cli.telefono || '',
-    items, descuento: r2(num(d.descuento)), itbis: !!d.itbis, tasa: num(S.negocio.tasa) || 18,
+    items, descuento: r2(num(d.descuento)), itbis: !!d.itbis, tasa: num(S.negocio.tasa) || 6.625,
     pagos: [], nota: d.nota.trim(), proxima: d.proxima || '', anulada: false, stock: items.some(it => it.invId), creada: new Date().toISOString() };
   const tot = calc(f).total;
   if (num(d.abono) > 0) f.pagos.push({ fecha: f.fecha, monto: r2(Math.min(num(d.abono), tot)), metodo: d.metodo });
@@ -3372,7 +3397,7 @@ document.addEventListener('click', async e => {
   if (a === 'abonar' && f) {
     const c = calc(f);
     modal('<h3>Registrar pago</h3><p class="small muted">Balance pendiente: <b>'+money(c.balance)+'</b></p>'+
-      '<label class="f">Monto (RD$)</label><input class="i" id="m_mon" inputmode="decimal" value="'+c.balance+'">'+
+      '<label class="f">Monto ($)</label><input class="i" id="m_mon" inputmode="decimal" value="'+c.balance+'">'+
       '<div class="row"><div class="grow"><label class="f">Método</label><select class="i" id="m_met">'+METODOS.map(m=>'<option>'+m+'</option>').join('')+'</select></div><div class="grow"><label class="f">Fecha</label><input class="i" type="date" id="m_fec" value="'+hoy()+'"></div></div>'+
       '<div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" data-act="cerrar">Cancelar</button><button class="btn p" data-act="abonook">Guardar pago</button></div>');
     return;
@@ -3527,7 +3552,7 @@ document.addEventListener('click', async e => {
   if (a === 'ajguardar') {
     await guardarNegocio({ ...S.negocio, nombre: $('#a_nom').value.trim() || 'Mi Salón', telefono: $('#a_tel').value.trim(), rnc: $('#a_rnc').value.trim(),
       direccion: $('#a_dir').value.trim(), prefijo: $('#a_pre').value.trim(), siguiente: Math.max(1, Math.floor(num($('#a_sig').value))),
-      itbis: $('#a_itb').checked, tasa: num($('#a_tas').value) || 18, pie: $('#a_pie').value, pagos: leerPagosForm() });
+      itbis: $('#a_itb').checked, tasa: num($('#a_tas').value) || 0, pie: $('#a_pie').value, pagos: leerPagosForm() });
     toast('Datos guardados');
   }
 });
@@ -3569,7 +3594,7 @@ document.addEventListener('change', async e => {
     if (d.app !== 'facturacion-pelo') throw 0;
     confirmar('Restaurar copia', 'Se reemplazarán los datos actuales por los de la copia del '+fFecha((d.fecha||'').slice(0,10))+' ('+(d.facturas||[]).length+' facturas, '+(d.inventario||[]).length+' productos, '+(d.fotos||[]).length+' fotos).', 'Restaurar', async () => {
       if (Array.isArray(d.fotos)) { try { await Fotos.reemplazar(d.fotos); } catch(err){} S.fotos = {}; }
-      S.negocio = {...DEF_NEG, ...(d.negocio||{})}; S.clientes = d.clientes||[]; S.servicios = d.servicios||[]; S.facturas = d.facturas||[]; S.inventario = d.inventario||[];
+      S.negocio = migrarNeg(d.negocio); S.clientes = d.clientes||[]; S.servicios = d.servicios||[]; S.facturas = d.facturas||[]; S.inventario = d.inventario||[];
       localPersist(); render(); toast('Datos restaurados');
     });
   } catch(err){ toast('Ese archivo no es una copia válida'); }
