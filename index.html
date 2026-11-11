@@ -246,7 +246,18 @@ nav.tabs button.on{color:var(--acc)}
 .stamp{font-size:11px;letter-spacing:.2em}
 .stamp.Pagada{background:#2f7a4f}.stamp.Pendiente{background:#1c1712;color:#e3cc8f}.stamp.Abonada{background:#a8843f}.stamp.Anulada{background:#888}
 .actions{max-width:600px}
-@media print{body{background:#fff}.receipt{box-shadow:none}}
+@media print{
+  :root{--bg:#fff;--card:#fff;--card2:#fff;--ink:#111;--muted:#555;--line:#ddd;--acc:#8e6d2f;--acc-2:#8e6d2f;--acc-soft:#f5efe2;--ok:#1f6b42;--bad:#a8323e;--warn:#8a5d0f}
+  html,body{background:#fff!important;color:#111}
+  .card,.kpi,.ans,.md{background:#fff!important;box-shadow:none!important;border-color:#ddd!important}
+  .kpi:before{background:#c9a961}
+  .receipt{background:#fff!important;box-shadow:none!important;border:1px solid #d9c49a;max-width:none}
+  .receipt .pay{background:#fff}
+  .stamp{display:none}
+  .chips,.noprint,.actions,nav.tabs,header.top .iconbtn,header.top .btn{display:none!important}
+  .wrap{padding:0!important;margin:0!important;max-width:none}
+  .bars .b i,.hbar i{background:#c9a961!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
