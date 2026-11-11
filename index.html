@@ -246,6 +246,35 @@ nav.tabs button.on{color:var(--acc)}
 .stamp{font-size:11px;letter-spacing:.2em}
 .stamp.Pagada{background:#2f7a4f}.stamp.Pendiente{background:#1c1712;color:#e3cc8f}.stamp.Abonada{background:#a8843f}.stamp.Anulada{background:#888}
 .actions{max-width:600px}
+
+/* ===== menú mejorado ===== */
+.side-top,.side-foot,nav.tabs .ll{display:none}
+nav.tabs button{font-size:11.5px;text-transform:none;letter-spacing:.02em;font-weight:500;color:#9d958a;padding:10px 0 12px;gap:4px;position:relative}
+nav.tabs button svg{width:24px;height:24px;stroke-width:1.7}
+nav.tabs button.on{color:var(--acc-2);font-weight:600}
+nav.tabs button.on:before{content:"";position:absolute;top:0;left:22%;right:22%;height:2px;border-radius:0 0 3px 3px;background:var(--gold-grad)}
+@media(max-width:360px){nav.tabs button{font-size:10.5px}}
+@media(min-width:1000px){
+  nav.tabs{width:270px;padding:30px 18px 22px;display:flex;flex-direction:column;background:linear-gradient(180deg,#141210,#0e0d0c)}
+  nav.tabs .in{flex:1;width:100%;max-width:none;gap:6px;margin-top:10px}
+  .side-top{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 6px 22px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .side-top .mono{width:64px;height:64px;font-size:21px;margin-bottom:12px}
+  .side-name{font-family:var(--serif);font-size:19px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;line-height:1.25;color:var(--ink)}
+  .side-sub{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--acc);margin-top:6px}
+  .side-new{margin-top:18px;width:100%;padding:12px 16px;font-size:14px}
+  nav.tabs button{flex:none;width:100%;flex-direction:row;justify-content:flex-start;align-items:center;gap:16px;padding:14px 18px;border-radius:12px;font-size:16px;letter-spacing:.03em;color:#bdb4a8;font-weight:400}
+  nav.tabs button svg{width:22px;height:22px;flex:none}
+  nav.tabs button:hover{background:rgba(255,255,255,.04);color:var(--ink)}
+  nav.tabs button.on{background:var(--acc-soft);color:var(--acc-2);font-weight:500;box-shadow:inset 3px 0 0 var(--acc)}
+  nav.tabs button.on:before{display:none}
+  nav.tabs .ls{display:none} nav.tabs .ll{display:inline}
+  .side-foot{display:block;width:100%;border-top:1px solid var(--line);padding-top:14px}
+  .side-set{display:flex;align-items:center;gap:14px;width:100%;background:none;border:0;color:#9d958a;font-size:14px;padding:12px 18px;border-radius:12px;cursor:pointer}
+  .side-set svg{width:20px;height:20px}
+  .side-set:hover,.side-set.on{color:var(--acc-2);background:var(--acc-soft)}
+  .wrap{padding:30px 48px 60px 318px;max-width:1420px}
+  header.top{display:none}
+}
 @media print{
   :root{--bg:#fff;--card:#fff;--card2:#fff;--ink:#111;--muted:#555;--line:#ddd;--acc:#8e6d2f;--acc-2:#8e6d2f;--acc-soft:#f5efe2;--ok:#1f6b42;--bad:#a8323e;--warn:#8a5d0f}
   html,body{background:#fff!important;color:#111}
@@ -272,7 +301,7 @@ nav.tabs button.on{color:var(--acc)}
   <div id="banner"></div>
   <main id="app"><div class="empty">Cargando…</div></main>
 </div>
-<nav class="tabs"><div class="in" id="tabs"></div></nav>
+<nav class="tabs"><div class="side-top"><div class="mono" id="sideMono">IHC</div><div class="side-name" id="sideName">Impulse Hair Creations</div><div class="side-sub" id="sideSub"></div></div><div class="in" id="tabs"></div><div class="side-foot"><button class="side-set" data-act="go" data-v="ajustes" id="sideSet"></button></div></nav>
 <div id="modal"></div>
 <div id="toast"></div>
 
@@ -2584,7 +2613,7 @@ const METODOS = ['Efectivo / Cash','Zelle','Cash App','Venmo','Tarjeta / Card','
 const CATEGORIAS = ['Pelo / bundles','Extensiones','Pelucas / lace','Pegamentos y keratina','Herramientas','Cuidado del pelo','Otro'];
 const UNIDADES = ['paquete','unidad','mechón','onza','gramo','frasco','caja'];
 
-const DEF_NEG = { nombre:'Impulse Hair Creations', telefono:'(201) 702-2736', direccion:'164 Sterling Ave, Jersey City, NJ 07305', rnc:'', prefijo:'IHC-', siguiente:1, itbis:true, tasa:6.625, pagos:{},
+const DEF_NEG = { nombre:'Impulse Hair Creations', lema:'Luxury Hair Extensions', telefono:'(201) 702-2736', direccion:'164 Sterling Ave, Jersey City, NJ 07305', rnc:'', prefijo:'IHC-', siguiente:1, itbis:true, tasa:6.625, pagos:{},
   pie:'Política de citas / Appointment Policy\nTodos los servicios son por cita. Se requiere un depósito del 30 % para reservar, el cual se descuenta del total el día del servicio. Si no se presenta a su cita, pierde el depósito.\nAll services are by appointment only. A 30% deposit is required to book and will be applied to your total on the day of service. Missed appointments forfeit the deposit.\n\n¡Gracias por tu preferencia! · Thank you for choosing us! 💇‍♀️' };
 function migrarNeg(n){
   n = {...DEF_NEG, ...(n||{})};
@@ -2726,16 +2755,18 @@ const ICON = {
   reportes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   ajustes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-2.7 1.1V21a2 2 0 11-4 0v-.1a1.6 1.6 0 00-2.7-1.1l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.6 1.6 0 003 15H3a2 2 0 110-4h.1a1.6 1.6 0 001.1-2.7l-.1-.1a2 2 0 112.8-2.8l.1.1A1.6 1.6 0 009 4.6V3a2 2 0 114 0v.1a1.6 1.6 0 002.7 1.1l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 001.1 2.7H21a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1.3z"/></svg>'
 };
-const TABS = [['inicio','Inicio'],['nueva','Nueva'],['facturas','Facturas'],['almacen','Almacén'],['clientes','Clientas'],['reportes','Reportes']];
+const TABS = [['inicio','Inicio'],['nueva','Nueva|Nueva factura'],['facturas','Facturas'],['almacen','Almacén'],['clientes','Clientas'],['reportes','Reportes']];
 
 /* ============ render ============ */
 function render(){
   $('#hdrName').textContent = S.negocio.nombre || 'Mi Salón';
   $('#hdrMono').textContent = iniciales();
-  const ciu = (S.negocio.direccion||'').split(',').slice(1).map(x => x.trim().replace(/\s*\d{5}$/,'')).filter(Boolean);
-  $('#hdrSub').textContent = ciu.length ? ciu.join(' · ').replace(/\bNJ\b/,'New Jersey') : 'Facturación · Billing';
+  $('#hdrSub').textContent = S.negocio.lema || 'Facturación · Billing';
   $('#gearBtn').innerHTML = ICON.ajustes;
-  $('#tabs').innerHTML = TABS.map(([k,l]) => '<button class="'+((S.view===k || (k==='facturas'&&S.view==='ver') || (k==='reportes'&&false))?'on':'')+'" data-act="go" data-v="'+k+'">'+ICON[k]+l+'</button>').join('');
+  $('#tabs').innerHTML = TABS.map(([k,l]) => { const [c, lg] = l.split('|'); return '<button class="'+((S.view===k || (k==='facturas'&&S.view==='ver') || (k==='clientes'&&false))?'on':'')+'" data-act="go" data-v="'+k+'">'+ICON[k]+'<span class="ls">'+c+'</span><span class="ll">'+(lg||c)+'</span></button>'; }).join('');
+  $('#sideMono').textContent = iniciales(); $('#sideName').textContent = S.negocio.nombre || '';
+  $('#sideSub').textContent = $('#hdrSub').textContent;
+  $('#sideSet').className = 'side-set' + ((S.view==='ajustes'||S.view==='servicios')?' on':''); $('#sideSet').innerHTML = ICON.ajustes + '<span>Negocio y ajustes</span>';
   let b = '';
   if (S.mode === 'local' && necesitaRespaldo()) b = '<div class="banner w">Tus datos viven solo en este teléfono. <b><a href="#" data-act="go" data-v="ajustes" style="color:inherit">Haz una copia de seguridad</a></b> para no perderlos.</div>';
   else if (S.slow) b = '<div class="banner w">No se pudo conectar todavía; lo que ves puede estar desactualizado.</div>';
@@ -3152,6 +3183,7 @@ function vAjustes(){
   return '<button class="btn g block" style="margin-bottom:12px" data-act="go" data-v="servicios">✂️ Servicios y precios ('+S.servicios.length+')</button>'+
   '<div class="sec-t"><h2>Datos del negocio</h2></div><div class="card">'+
   '<label class="f" style="margin-top:0">Nombre del salón / estilista</label><input class="i" id="a_nom" value="'+esc(n.nombre)+'"'+dis+'>'+
+  '<label class="f">Frase debajo del nombre</label><input class="i" id="a_lema" value="'+esc(n.lema||'')+'" placeholder="Luxury Hair Extensions"'+dis+'>'+
   '<div class="row"><div class="grow"><label class="f">Teléfono</label><input class="i" id="a_tel" value="'+esc(n.telefono)+'"'+dis+'></div><div class="grow"><label class="f">EIN / Tax ID (opcional)</label><input class="i" id="a_rnc" value="'+esc(n.rnc)+'"'+dis+'></div></div>'+
   '<label class="f">Dirección</label><input class="i" id="a_dir" value="'+esc(n.direccion)+'"'+dis+'>'+
   '<div class="row"><div class="grow"><label class="f">Prefijo de factura</label><input class="i" id="a_pre" value="'+esc(n.prefijo)+'"'+dis+'></div><div class="grow"><label class="f">Próximo número</label><input class="i" id="a_sig" inputmode="numeric" value="'+proximoNumero()+'"'+dis+'></div></div>'+
@@ -3664,7 +3696,7 @@ document.addEventListener('click', async e => {
   }
   // ajustes
   if (a === 'ajguardar') {
-    await guardarNegocio({ ...S.negocio, nombre: $('#a_nom').value.trim() || 'Mi Salón', telefono: $('#a_tel').value.trim(), rnc: $('#a_rnc').value.trim(),
+    await guardarNegocio({ ...S.negocio, nombre: $('#a_nom').value.trim() || 'Mi Salón', lema: $('#a_lema').value.trim(), telefono: $('#a_tel').value.trim(), rnc: $('#a_rnc').value.trim(),
       direccion: $('#a_dir').value.trim(), prefijo: $('#a_pre').value.trim(), siguiente: Math.max(1, Math.floor(num($('#a_sig').value))),
       itbis: $('#a_itb').checked, tasa: num($('#a_tas').value) || 0, pie: $('#a_pie').value, pagos: leerPagosForm() });
     toast('Datos guardados');
