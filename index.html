@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Facturación · Extensiones de Pelo</title>
-<meta name="theme-color" content="#8a2d55">
+<meta name="theme-color" content="#0e0d0c">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#faf6f3; --card:#ffffff; --ink:#2a1d22; --muted:#7d6b72; --line:#ecdfe3;
@@ -148,16 +148,115 @@ textarea.i{min-height:64px;resize:vertical}
 .low{color:var(--bad)} .lowbg{background:var(--bad-soft)}
 .iconbtn{border:1px solid var(--line);background:#fff;border-radius:10px;width:38px;height:36px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted)}
 .iconbtn svg{width:20px;height:20px}
+
+/* ================= LUJO · negro y dorado ================= */
+:root{
+  --bg:#0e0d0c; --card:#171513; --card2:#1d1a17; --ink:#f3ece2; --muted:#a39a8e; --line:#2b2723;
+  --acc:#c9a961; --acc-2:#e3cc8f; --acc-soft:rgba(201,169,97,.13); --gold-grad:linear-gradient(135deg,#e9d39b 0%,#c9a961 45%,#a8843f 100%);
+  --ok:#8cc5a0; --ok-soft:rgba(140,197,160,.13); --warn:#e6c07a; --warn-soft:rgba(230,192,122,.13); --bad:#ec9a9a; --bad-soft:rgba(236,154,154,.13);
+  --r:16px; --serif:"Cormorant Garamond",Georgia,serif;
+}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.5 Jost,system-ui,sans-serif;font-weight:400;letter-spacing:.01em}
+body{background:radial-gradient(1200px 600px at 80% -10%,rgba(201,169,97,.10),transparent 60%),var(--bg);background-attachment:fixed;min-height:100vh}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;letter-spacing:.01em}
+.sec-t h2{font-size:26px} .card h3{font-size:20px!important}
+.wrap{max-width:1100px}
+header.top{padding:6px 0 14px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:12px}
+.mono{width:46px;height:46px;border-radius:50%;border:1px solid var(--acc);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:600;font-size:16px;letter-spacing:.08em;color:var(--acc);background:radial-gradient(circle at 30% 25%,rgba(233,211,155,.18),transparent 70%);flex:none}
+header.top h1{font-size:26px;color:var(--ink);text-transform:uppercase;letter-spacing:.14em;font-weight:600;line-height:1.1}
+header.top .sub{font-size:10.5px;color:var(--acc);text-transform:uppercase;letter-spacing:.32em;margin-top:3px}
+@media(max-width:520px){header.top h1{font-size:15px;letter-spacing:.08em}header.top .sub{font-size:8.5px;letter-spacing:.2em}.mono{width:38px;height:38px;font-size:13px}.brand{gap:9px}header.top .lbl{display:none}header.top .btn.p{width:40px;height:40px;padding:0;font-size:20px}.receipt{padding:26px 18px 22px}.receipt .bh h2{font-size:19px;letter-spacing:.12em}.receipt th{letter-spacing:.06em;font-size:9px}}
+.card,.kpi{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.kpi{position:relative;overflow:hidden;padding:16px}
+.kpi:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--gold-grad);opacity:.85}
+.kpi .l{text-transform:uppercase;letter-spacing:.16em;font-size:10.5px;color:var(--muted)}
+.kpi .v{font-family:var(--serif);font-size:30px;font-weight:600;letter-spacing:0}
+input.i,select.i,textarea.i{background:#11100e;border-color:var(--line);color:var(--ink)}
+input.i::placeholder,textarea.i::placeholder{color:#6f675e}
+input.i:focus,select.i:focus,textarea.i:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
+input[type=date].i{color-scheme:dark}
+label.f{text-transform:uppercase;letter-spacing:.12em;font-size:10.5px}
+.btn{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:999px;font-weight:500;letter-spacing:.06em;padding:9px 18px}
+.btn:hover{border-color:var(--acc)}
+.btn.p{background:var(--gold-grad);border:0;color:#1a1408;font-weight:600;box-shadow:0 6px 18px rgba(201,169,97,.25)}
+.btn.p:active{filter:brightness(.92);background:var(--gold-grad)}
+.btn.g{background:var(--acc-soft);border:1px solid rgba(201,169,97,.35);color:var(--acc-2)}
+.btn.d{color:var(--bad);border-color:rgba(236,154,154,.35)}
+.btn.wa{background:#1f7a48;border-color:#1f7a48;color:#fff}
+.btn.sm{padding:6px 12px;font-size:12.5px}
+.iconbtn{background:transparent;border:1px solid var(--line);color:var(--acc);border-radius:50%;width:40px;height:40px}
+.list .it{border-bottom-color:var(--line)}
+.list .it .t{font-weight:500;letter-spacing:.02em}
+.pill{letter-spacing:.06em;font-weight:600;border:1px solid transparent}
+.pill.Pagada{background:var(--ok-soft);color:var(--ok);border-color:rgba(140,197,160,.3)}
+.pill.Pendiente{background:var(--bad-soft);color:var(--bad);border-color:rgba(236,154,154,.3)}
+.pill.Abonada{background:var(--warn-soft);color:var(--warn);border-color:rgba(230,192,122,.3)}
+.pill.Anulada{background:#222;color:#888}
+.seg,.chips button{background:var(--card);border-color:var(--line)}
+.seg button.on{background:var(--acc-soft);color:var(--acc-2)}
+.chips button{color:var(--muted);letter-spacing:.04em}
+.chips button.on{background:var(--gold-grad);border-color:transparent;color:#1a1408;font-weight:600}
+.line-item{background:#131210;border-color:var(--line)}
+.totals{background:var(--acc-soft);border:1px solid rgba(201,169,97,.25)}
+.totals .r.big{border-top-color:rgba(201,169,97,.4);color:var(--acc-2);font-family:var(--serif);font-size:24px}
+.switch input{accent-color:var(--acc)}
+.banner.w{background:var(--warn-soft);color:var(--warn);border:1px solid rgba(230,192,122,.25)}
+.banner.b{background:var(--bad-soft);color:var(--bad)}
+.lowbg{background:rgba(236,154,154,.08)!important;border:1px solid rgba(236,154,154,.25)!important}
+.ask{background:linear-gradient(135deg,#2a2214,#16120b);border:1px solid rgba(201,169,97,.35);color:var(--ink)}
+.ask h3{color:var(--acc-2)}
+.ask input.i{background:#0e0d0c;color:var(--ink)} .ask .btn{color:var(--ink)}
+.ans{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.qty button{background:transparent;border-color:var(--line);color:var(--acc)}
+.bars .b i{background:var(--gold-grad)}
+.hbar{background:#24201c} .hbar i{background:var(--gold-grad)}
+.ov{background:rgba(0,0,0,.7);backdrop-filter:blur(3px)}
+.md{background:var(--card2);border:1px solid var(--line);color:var(--ink)}
+.toast{background:var(--gold-grad);color:#1a1408;font-weight:600}
+.x{color:var(--muted)}
+.empty{color:var(--muted)}
+.fgrid .ph{background:#222}
+nav.tabs{background:rgba(14,13,12,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+nav.tabs button{color:#8a8178;letter-spacing:.06em;font-size:10.5px;text-transform:uppercase}
+nav.tabs button.on{color:var(--acc)}
+@media(min-width:1000px){
+  nav.tabs{top:0;bottom:0;right:auto;width:210px;border-top:0;border-right:1px solid var(--line);flex-direction:column;justify-content:flex-start;padding:28px 12px}
+  nav.tabs .in{flex-direction:column;gap:4px}
+  nav.tabs button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;border-radius:12px;font-size:12px}
+  nav.tabs button.on{background:var(--acc-soft)}
+  .wrap{margin-left:auto;margin-right:auto;padding:28px 40px 60px 250px;max-width:1340px}
+  .toast{bottom:30px}
+}
+/* factura: papelería marfil */
+.receipt{--bg:#f3ede2;--ink:#1c1712;--muted:#857a6c;--line:#e4dacb;--acc:#a8843f;--acc-2:#8e6d2f;--acc-soft:#f2e8d3;--ok:#2f7a4f;--bad:#a8323e;--warn:#9a6a12;
+  background:#fbf8f2;color:var(--ink);border:1px solid #e9dfcd;border-radius:6px;padding:34px 30px 28px;max-width:600px;
+  box-shadow:0 30px 60px rgba(0,0,0,.45),inset 0 0 0 6px #fbf8f2,inset 0 0 0 7px #d9c49a}
+.receipt .bh{border-bottom:0;padding-bottom:6px;margin-bottom:18px}
+.receipt .bh:after{content:"";display:block;height:3px;margin-top:16px;border-top:1px solid #c9a961;border-bottom:1px solid #c9a961}
+.receipt .mono-r{width:58px;height:58px;margin:0 auto 10px;border-radius:50%;border:1px solid #c9a961;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.08em;color:#a8843f}
+.receipt .bh h2{color:#1c1712;font-size:26px;text-transform:uppercase;letter-spacing:.16em}
+.receipt .doc{font-size:10.5px;letter-spacing:.34em;color:#a8843f;text-transform:uppercase;margin:6px 0 4px}
+.receipt th{color:#a8843f;letter-spacing:.14em;font-size:10px;border-bottom:1px solid #c9a961}
+.receipt td{border-bottom:1px dotted #ddd2bf}
+.receipt .sum .r.big{color:#1c1712;border-top:1px solid #c9a961;font-family:var(--serif);font-size:24px}
+.receipt .foot{font-family:var(--serif);font-style:italic;font-size:14px;color:#6d6357;border-top:1px solid #e4dacb;padding-top:12px}
+.receipt .pay{background:#f6f0e3;border-color:#d9c49a}
+.receipt .pay h4{color:#8e6d2f}
+.stamp{font-size:11px;letter-spacing:.2em}
+.stamp.Pagada{background:#2f7a4f}.stamp.Pendiente{background:#1c1712;color:#e3cc8f}.stamp.Abonada{background:#a8843f}.stamp.Anulada{background:#888}
+.actions{max-width:600px}
+@media print{body{background:#fff}.receipt{box-shadow:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div>
-      <h1 id="hdrName">Mi Salón</h1>
-      <div class="sub" id="hdrSub">Facturación · Billing</div>
-    </div>
-    <div class="row" style="gap:8px"><button class="iconbtn" data-act="go" data-v="ajustes" aria-label="Datos del negocio" id="gearBtn"></button><button class="btn p sm" data-act="go" data-v="nueva">+ Factura</button></div>
+    <div class="brand"><div class="mono" id="hdrMono">IHC</div><div>
+      <h1 id="hdrName">Impulse Hair Creations</h1>
+      <div class="sub" id="hdrSub">Jersey City · New Jersey</div>
+    </div></div>
+    <div class="row" style="gap:8px"><button class="iconbtn" data-act="go" data-v="ajustes" aria-label="Datos del negocio" id="gearBtn"></button><button class="btn p sm" data-act="go" data-v="nueva" aria-label="Nueva factura">+<span class="lbl"> Factura</span></button></div>
   </header>
   <div id="banner"></div>
   <main id="app"><div class="empty">Cargando…</div></main>
@@ -2510,6 +2609,7 @@ function nuevoDraft(){
     itbis: !!S.negocio.itbis, abono: 0, metodo: 'Efectivo / Cash', nota: '', proxima: '' };
 }
 
+function iniciales(){ return String(S.negocio.nombre||'').split(/\s+/).filter(w => w && /^[A-Za-zÁÉÍÓÚÑ]/.test(w)).slice(0,3).map(w => w[0].toUpperCase()).join('') || '✦'; }
 /* ============ cálculos ============ */
 function calc(f){
   const subtotal = r2((f.items||[]).reduce((a,it) => a + num(it.cant) * num(it.precio), 0));
@@ -2620,6 +2720,9 @@ const TABS = [['inicio','Inicio'],['nueva','Nueva'],['facturas','Facturas'],['al
 /* ============ render ============ */
 function render(){
   $('#hdrName').textContent = S.negocio.nombre || 'Mi Salón';
+  $('#hdrMono').textContent = iniciales();
+  const ciu = (S.negocio.direccion||'').split(',').slice(1).map(x => x.trim().replace(/\s*\d{5}$/,'')).filter(Boolean);
+  $('#hdrSub').textContent = ciu.length ? ciu.join(' · ').replace(/\bNJ\b/,'New Jersey') : 'Facturación · Billing';
   $('#gearBtn').innerHTML = ICON.ajustes;
   $('#tabs').innerHTML = TABS.map(([k,l]) => '<button class="'+((S.view===k || (k==='facturas'&&S.view==='ver') || (k==='reportes'&&false))?'on':'')+'" data-act="go" data-v="'+k+'">'+ICON[k]+l+'</button>').join('');
   let b = '';
@@ -2659,7 +2762,7 @@ function vInicio(){
     (deben.length ? '<div class="card"><div class="sec-t"><h2>Clientas que deben</h2><span class="small muted">'+deben.length+'</span></div><div class="list">'+ordenFact(deben).slice(0,8).map(filaFactura).join('')+'</div></div>' : '')+
     '<div class="card"><div class="sec-t"><h2>Últimas facturas</h2><button class="btn sm g" data-act="go" data-v="facturas">Ver todas</button></div>'+
     (ult.length ? '<div class="list">'+ult.map(filaFactura).join('')+'</div>' :
-      '<div class="empty">Todavía no hay facturas.<br><br>'+(S.servicios.length?'':'<b>Paso 1:</b> ve a <b>Negocio</b> y pon el nombre del salón.<br><b>Paso 2:</b> en <b>Servicios</b> carga tus precios.<br><b>Paso 3:</b> crea tu primera factura.<br><br>')+'<button class="btn p" data-act="go" data-v="nueva">+ Crear factura</button></div>')+'</div>';
+      '<div class="empty">Todavía no hay facturas.<br><br>'+(S.servicios.length?'':'<span style="font-family:var(--serif);font-size:22px;color:var(--acc-2);font-style:italic">Bienvenida a tu salón</span><br><br><b>1.</b> Toca <b>⚙</b> → <b>Servicios y precios</b> y pon tus precios.<br><b>2.</b> En <b>Almacén</b> registra tu pelo y productos.<br><b>3.</b> Crea tu primera factura.<br><br>')+'<button class="btn p" data-act="go" data-v="nueva">+ Crear factura</button></div>')+'</div>';
 }
 
 function vNueva(){
@@ -2735,12 +2838,12 @@ function vVer(){
   const c = calc(f); const n = S.negocio;
   return '<div class="row between noprint" style="margin-bottom:10px"><button class="btn sm" data-act="go" data-v="facturas">← Facturas</button><span class="pill '+c.estado+'">'+c.estado+'</span></div>'+
   '<div class="receipt"><div class="stamp '+c.estado+'">'+c.estado.toUpperCase()+'</div>'+
-  '<div class="bh"><h2>'+esc(n.nombre)+'</h2>'+
+  '<div class="bh"><div class="mono-r">'+iniciales()+'</div><h2>'+esc(n.nombre)+'</h2>'+
    (n.direccion?'<div class="small muted">'+esc(n.direccion)+'</div>':'')+
    '<div class="small muted">'+[n.telefono?'Tel. '+esc(n.telefono):'', n.rnc?'EIN '+esc(n.rnc):''].filter(Boolean).join(' · ')+'</div></div>'+
-  '<div class="meta"><div><div class="muted small">Cliente</div><b>'+esc(f.clienteNombre||'—')+'</b>'+(f.clienteTel?'<div class="small">'+esc(f.clienteTel)+'</div>':'')+'</div>'+
-   '<div style="text-align:right"><div class="muted small">Factura</div><b>'+numFmt(f)+'</b><div class="small">'+fFecha(f.fecha)+'</div></div></div>'+
-  '<table><thead><tr><th>Descripción</th><th class="tr">Cant.</th><th class="tr">Importe</th></tr></thead><tbody>'+
+  '<div class="doc" style="text-align:center;margin:-6px 0 16px">Factura · Invoice</div><div class="meta"><div><div class="muted small">Clienta · Client</div><b>'+esc(f.clienteNombre||'—')+'</b>'+(f.clienteTel?'<div class="small">'+esc(f.clienteTel)+'</div>':'')+'</div>'+
+   '<div style="text-align:right"><div class="muted small">No. · Date</div><b>'+numFmt(f)+'</b><div class="small">'+fFecha(f.fecha)+'</div></div></div>'+
+  '<table><thead><tr><th>Servicio · Service</th><th class="tr">Cant. · Qty</th><th class="tr">Importe · Amount</th></tr></thead><tbody>'+
    f.items.map(it => '<tr><td>'+esc(it.desc)+'<div class="small muted num">'+money(it.precio)+' c/u</div></td><td class="tr num">'+esc(it.cant)+'</td><td class="tr num">'+money(num(it.cant)*num(it.precio))+'</td></tr>').join('')+
   '</tbody></table><div class="sum">'+
    '<div class="r"><span>Subtotal</span><span class="num">'+money(c.subtotal)+'</span></div>'+
@@ -2748,7 +2851,7 @@ function vVer(){
    (f.itbis && c.itbis?'<div class="r"><span>Sales tax '+c.tasa+'%</span><span class="num">'+money(c.itbis)+'</span></div>':'')+
    '<div class="r big"><span>TOTAL</span><span class="num">'+money(c.total)+'</span></div>'+
    (f.pagos||[]).map(p => '<div class="r small"><span>Pago '+fFecha(p.fecha)+' · '+esc(p.metodo)+'</span><span class="num">−'+money(p.monto)+'</span></div>').join('')+
-   (!f.anulada ? '<div class="r" style="font-weight:700;margin-top:4px"><span>'+(c.balance>0?'Balance pendiente':'Balance')+'</span><span class="num" style="color:'+(c.balance>0?'var(--bad)':'var(--ok)')+'">'+money(c.balance)+'</span></div>' : '')+
+   (!f.anulada ? '<div class="r" style="font-weight:700;margin-top:4px"><span>'+(c.balance>0?'Balance pendiente · Balance due':'Balance')+'</span><span class="num" style="color:'+(c.balance>0?'var(--bad)':'var(--ok)')+'">'+money(c.balance)+'</span></div>' : '')+
   '</div>'+(f.nota?'<div class="small" style="margin-top:12px;padding:8px 10px;background:var(--bg);border-radius:8px"><b>Nota:</b> '+esc(f.nota)+'</div>':'')+
   (f.proxima && !f.anulada ? '<div class="small" style="margin-top:10px;text-align:center;padding:8px;border-radius:8px;background:var(--acc-soft);color:var(--acc)"><b>Próximo mantenimiento: '+fFecha(f.proxima)+'</b></div>' : '')+
   (!f.anulada && c.balance > 0 ? pagoHtml(c.balance) : '')+
@@ -2885,14 +2988,14 @@ async function collage(an, de, etq2){
   const [a, b] = await Promise.all([imgDe(an), imgDe(de)]);
   const W = 1080, pad = 24, colW = (W - pad*3) / 2, colH = Math.round(colW * 4 / 3), top = 120, H = top + colH + 150;
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d');
-  x.fillStyle = '#faf6f3'; x.fillRect(0, 0, W, H);
-  x.fillStyle = '#8a2d55'; x.font = '700 56px Fraunces, Georgia, serif'; x.textAlign = 'center'; x.fillText('Antes  ·  ' + etq2, W/2, 84);
+  x.fillStyle = '#0e0d0c'; x.fillRect(0, 0, W, H); x.strokeStyle = '#c9a961'; x.lineWidth = 2; x.strokeRect(10, 10, W-20, H-20);
+  x.fillStyle = '#e3cc8f'; x.font = 'italic 600 60px "Cormorant Garamond", Georgia, serif'; x.textAlign = 'center'; x.fillText('Antes  ·  ' + etq2, W/2, 84);
   const pinta = (img, px) => { const r = Math.max(colW / img.width, colH / img.height); const w = colW / r, h = colH / r;
     x.save(); x.beginPath(); if (x.roundRect) x.roundRect(px, top, colW, colH, 28); else x.rect(px, top, colW, colH); x.clip();
     x.drawImage(img, (img.width - w)/2, (img.height - h)/2, w, h, px, top, colW, colH); x.restore(); };
   pinta(a, pad); pinta(b, pad*2 + colW);
-  x.fillStyle = '#2a1d22'; x.font = '700 40px "DM Sans", sans-serif'; x.fillText(S.negocio.nombre || '', W/2, top + colH + 72);
-  if (S.negocio.telefono) { x.fillStyle = '#7d6b72'; x.font = '400 30px "DM Sans", sans-serif'; x.fillText(S.negocio.telefono, W/2, top + colH + 118); }
+  x.fillStyle = '#f3ece2'; x.font = '600 42px "Cormorant Garamond", Georgia, serif'; x.fillText((S.negocio.nombre || '').toUpperCase().split('').join(String.fromCharCode(8202)), W/2, top + colH + 72);
+  if (S.negocio.telefono) { x.fillStyle = '#c9a961'; x.font = '400 28px Jost, sans-serif'; x.fillText(S.negocio.telefono, W/2, top + colH + 118); }
   return cv.toDataURL('image/jpeg', 0.88);
 }
 async function compartirArchivos(files){
